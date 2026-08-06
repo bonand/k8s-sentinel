@@ -1,0 +1,29 @@
+# path: deploy/statefulset.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata: { name: k8s-sentinel, namespace: k8s-sentinel }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: { name: k8s-sentinel, namespace: k8s-sentinel }
+spec:
+  serviceName: k8s-sentinel
+  replicas: 1
+  selector: { matchLabels: { app: k8s-sentinel } }
+  template:
+    metadata: { labels: { app: k8s-sentinel } }
+    spec:
+      serviceAccountName: k8s-sentinel
+      containers:
+        - name: agent
+          image: registry.internal/k8s-sentinel:0.1.0
+          ports: [{ containerPort: 9000 }]
+          env:
+            - { name: K8S_SENTINEL_EXECUTION_ENABLED, value: "false" }
+            - { name: ANTHROPIC_API_KEY, valueFrom: { secretKeyRef: { name: k8s-sentinel-secrets, key: anthropic-api-key } } }
+          volumeMounts: [{ name: data, mountPath: /app/data }]
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources: { requests: { storage: 10Gi } }

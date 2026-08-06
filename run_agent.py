@@ -12,6 +12,7 @@ from activegraph.llm import AnthropicProvider
 from k8s_sentinel.pack import k8s_sentinel_pack
 from k8s_sentinel.ingestion import GoalListener
 
+# Carica .env PRIMA di leggere le variabili e prima che i behavior leggano env
 load_dotenv()
 
 
@@ -22,6 +23,7 @@ def _stop(*_args):
 def main():
     rt = Runtime(
         Graph(),
+        run_id=os.getenv("ACTIVEGRAPH_RUN_ID", "k8s-sentinel-dev"),
         llm_provider=AnthropicProvider(),
         persist_to=os.getenv("ACTIVEGRAPH_PERSIST_TO", "sqlite:///data/sentinel.db"),
     )

@@ -1,0 +1,1 @@
+- `POST /reject/{approval_id}` endpoint: denial registrato come `approval.denied` con approver e reason

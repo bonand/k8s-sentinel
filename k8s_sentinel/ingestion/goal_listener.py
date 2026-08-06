@@ -2,6 +2,7 @@
 """HTTP ingestion: writes GoalRequest objects onto the graph."""
 import logging
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
@@ -40,3 +41,16 @@ class GoalListener:
             rt.approve(approval_id, approved_by=approved_by)
             rt.run_until_idle(); rt.save_state()
             return {"status": "approved", "id": approval_id}
+
+        @self.app.post("/reject/{approval_id}")
+        async def reject(approval_id: str, denied_by: str = "operator",
+                         reason: str = "rejected by operator"):
+            # Il framework emette approval.denied; il nome del metodo può
+            # variare tra versioni (deny/reject): usiamo un fallback sicuro.
+            fn = getattr(rt, "deny", None) or getattr(rt, "reject", None)
+            if fn is None:
+                return JSONResponse(status_code=501,
+                                    content={"error": "runtime has no deny primitive"})
+            fn(approval_id, denied_by=denied_by, reason=reason)
+            rt.save_state()
+            return {"status": "denied", "id": approval_id}

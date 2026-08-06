@@ -23,10 +23,10 @@ def _stop(*_args):
 def main():
     rt = Runtime(
         Graph(),
-        run_id=os.getenv("ACTIVEGRAPH_RUN_ID", "k8s-sentinel-dev"),
         llm_provider=AnthropicProvider(),
         persist_to=os.getenv("ACTIVEGRAPH_PERSIST_TO", "sqlite:///data/sentinel.db"),
     )
+    # Il run_id è generato dal framework e accessibile come rt.run_id
     rt.load_pack(k8s_sentinel_pack)
 
     listener = GoalListener(rt)
@@ -35,6 +35,9 @@ def main():
 
     signal.signal(signal.SIGTERM, _stop)
     signal.signal(signal.SIGINT, _stop)
+
+    print(f"K8s Sentinel started: run_id={rt.run_id}")
+    print(f"HTTP server listening on {host}:{port}")
 
     uvicorn.run(listener.app, host=host, port=port)
 

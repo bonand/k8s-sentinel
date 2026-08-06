@@ -1,0 +1,14 @@
+# path: deploy/dashboard.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: k8s-sentinel-dashboard, namespace: k8s-sentinel }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: dashboard } }
+  template:
+    metadata: { labels: { app: dashboard } }
+    spec:
+      containers:
+        - name: dashboard
+          image: registry.internal/k8s-sentinel-dashboard:0.1.0
+          ports: [{ containerPort: 8000 }]

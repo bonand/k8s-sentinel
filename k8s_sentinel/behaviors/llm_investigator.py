@@ -1,6 +1,7 @@
 # path: k8s_sentinel/behaviors/llm_investigator.py
 """Agentic investigation via @llm_behavior with tool loop."""
 import datetime as dt
+import os
 from activegraph import llm_behavior
 from ..prompts import SENTINEL_SYSTEM_PROMPT
 from ..schemas import InvestigationResult
@@ -14,7 +15,9 @@ def _now(): return dt.datetime.now(dt.timezone.utc).isoformat()
               description=SENTINEL_SYSTEM_PROMPT,
               output_schema=InvestigationResult,
               tools=[query_cluster_events, query_service_logs,
-                     get_deployment_history, get_node_resource_status])
+                     get_deployment_history, get_node_resource_status],
+              model=os.getenv("SENTINEL_LLM_MODEL", "claude-sonnet-4-5"),
+             )
 def llm_investigator(event, graph, ctx, llm_output: InvestigationResult):
     inv = graph.get_object(event.payload["investigation_id"])
     if inv is None: return

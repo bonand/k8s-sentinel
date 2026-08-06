@@ -1,0 +1,45 @@
+<!-- path: dashboard/static/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+<title>K8s Sentinel Dashboard</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+body{font-family:sans-serif;margin:20px}
+.item{padding:10px;border:1px solid #ddd;margin-bottom:6px;cursor:pointer;border-radius:4px}
+.P1{border-left:4px solid red}.P2{border-left:4px solid orange}.P3{border-left:4px solid gold}
+.link{stroke:#999;stroke-opacity:.6}
+</style>
+</head>
+<body>
+<h1>K8s Sentinel</h1>
+<div id="list">Loading…</div>
+<svg id="graph" width="100%" height="600"></svg>
+<script>
+async function load(){
+  const r=await(await fetch('/api/investigations')).json();
+  document.getElementById('list').innerHTML='';
+  r.forEach(i=>{const d=document.createElement('div');
+    d.className='item '+(i.severity||'');
+    d.innerHTML=`<b>${i.anomaly_type}</b> ${i.external_id}<br><small>${i.status} · ${i.severity}</small>`;
+    d.onclick=()=>g(i.id);document.getElementById('list').appendChild(d);});
+}
+async function g(id){
+  const d=await(await fetch(`/api/investigation/${id}/graph`)).json();
+  const svg=d3.select('#graph'),w=900,h=600;svg.selectAll('*').remove();
+  const sim=d3.forceSimulation(d.nodes)
+    .force('link',d3.forceLink(d.edges).id(x=>x.id).distance(110))
+    .force('charge',d3.forceManyBody().strength(-300))
+    .force('center',d3.forceCenter(w/2,h/2));
+  const l=svg.append('g').selectAll('line').data(d.edges).enter().append('line').attr('class','link');
+  const n=svg.append('g').selectAll('g').data(d.nodes).enter().append('g');
+  n.append('circle').attr('r',10).attr('fill',x=>({Investigation:'#4a90e2',Anomaly:'#e74c3c',Remediation:'#2ecc71',Alert:'#f39c12'}[x.type]||'#95a5a6'));
+  n.append('text').attr('dy',22).attr('text-anchor','middle').style('font-size','10px').text(x=>x.type);
+  n.append('title').text(x=>JSON.stringify(x.data,null,1));
+  sim.on('tick',()=>{l.attr('x1',x=>x.source.x).attr('y1',x=>x.source.y).attr('x2',x=>x.target.x).attr('y2',x=>x.target.y);
+    n.attr('transform',x=>`translate(${x.x},${x.y})`);});
+}
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+// path: tests/fixtures/oom_incident.json
+{
+  "events": [
+    {"type": "Warning", "reason": "OOMKilling",
+     "message": "Memory cgroup out of memory: Killed process 1234 (java)",
+     "object_kind": "Pod", "object_name": "payments-api-7f9d8c-x9z2",
+     "object_namespace": "production", "count": 3,
+     "first_timestamp": "2026-08-05T09:58:10Z", "last_timestamp": "2026-08-05T10:03:41Z"}
+  ],
+  "metadata": {"count": 1, "truncated": false}
+}

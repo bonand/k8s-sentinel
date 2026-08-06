@@ -1,0 +1,22 @@
+# path: docker-compose.yaml
+version: '3.8'
+services:
+  agent:
+    build: { context: ., dockerfile: Dockerfile }
+    ports: ["9000:9000"]
+    environment:
+      - ACTIVEGRAPH_RUN_ID=k8s-sentinel-dev
+      - ACTIVEGRAPH_PERSIST_TO=sqlite:///data/sentinel.db
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - LOKI_URL=http://loki:3100
+      - K8S_SENTINEL_EXECUTION_ENABLED=false
+    volumes: [./data:/app/data]
+    depends_on: [loki]
+  dashboard:
+    build: { context: ./dashboard, dockerfile: Dockerfile }
+    ports: ["8000:8000"]
+    environment: [ACTIVEGRAPH_STORE_URL=sqlite:///data/sentinel.db]
+    volumes: [./data:/app/data:ro]
+  loki:
+    image: grafana/loki:2.9.0
+    ports: ["3100:3100"]

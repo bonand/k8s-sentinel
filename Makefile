@@ -1,5 +1,5 @@
 # path: Makefile
-.PHONY: install dev test lint typecheck run dashboard clean
+.PHONY: install dev test test-coverage lint typecheck run dashboard clean
 
 install:
 	pip install -r requirements.txt
@@ -27,5 +27,5 @@ dashboard:
 	uvicorn dashboard.main:app --reload --port 8000
 
 clean:
-	rm -rf data/*.db .pytest_cache .mypy_cache
+	rm -rf data/*.db .pytest_cache .mypy_cache .coverage
 	find . -type d -name __pycache__ -exec rm -rf {} +

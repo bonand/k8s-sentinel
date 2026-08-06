@@ -11,6 +11,9 @@ dev:
 test:
 	pytest
 
+test-coverage:
+	pytest --cov=k8s_sentinel --cov-report=term-missing
+
 lint:
 	ruff check k8s_sentinel tests dashboard
 
